@@ -4,14 +4,9 @@
     working with existing repo, along current branch, stage, unstage, commit changes.
     todo:
         auto install dulwich and gittle, as per shellista.. but install more recent dulwich
-        [complete] checkout branch
-        new  repo
-        [complete] new branch
-        new remote
-        pull  push clone
-        [complete] open button to open files in repo
-        git rename file
-        log/diff/open old ref
+        make pull less dangerous.  currently, simply overwrites existing tree. maybe need fetch rather than pull, and locL merge ability...
+        add delete button for untracked files, which actually deletes.
+        show log, diff, and open old ref
         merge
         display last commit time
         '''
@@ -28,13 +23,18 @@ from repo_finder import FilteredDirDropdown
 
 from dropdown import DropdownView
 from dulwich import porcelain
+from dulwich.client import default_user_agent_string
+
 from gittle import Gittle
 import itertools
 import threading
 
 import keychain
 import posix
+import urlparse,urllib2   #for push
 from uidialog import UIDialog
+
+SAVE_PASSWORDS=True
 class repoView (object):
     def __init__(self):
         self.g=None
@@ -414,29 +414,21 @@ class repoView (object):
             config.write_to_path()
         repo.pull(origin_uri=uri)
         self.refresh()
+    @ui.in_background
+    def push_action(self,sender):
 
-    def push_action(args):
-        raise NotImplementedError('push not implemented yet')
-        parser = argparse.ArgumentParser(prog='git push'
-                                         , usage='git push [http(s)://<remote repo>] [-u username[:password]]'
-                                         , description="Push to a remote repository")
-        parser.add_argument('url', type=str, nargs='?', help='URL to push to')
-        parser.add_argument('-u', metavar='username[:password]', type=str, required=False, help='username[:password]')
-        result = parser.parse_args(args)
-
-        user, sep, pw = result.u.partition(':') if result.u else (None,None,None)
-
-        repo = _get_repo()
+        user, sep, pw =  (None,None,None)
+        repo = self._get_repo()
         
-        #Try to get the remote origin
-        if not result.url:
-            result.url = repo.remotes.get('origin','')
+        remote=self.view['remote'].text
+        if remote in self.remotes_iterator():
+            remote = repo.remotes.get(remote,'')
 
         branch_name = os.path.join('refs','heads', repo.active_branch)  #'refs/heads/%s' % repo.active_branch
+        # tODO  use remote branch_name 
+        print "Attempting to push to: {0}, branch: {1}".format(remote, branch_name)
 
-        print "Attempting to push to: {0}, branch: {1}".format(result.url, branch_name)
-
-        netloc = urlparse.urlparse(result.url).netloc
+        netloc = urlparse.urlparse(remote).netloc
 
         keychainservice = 'shellista.git.{0}'.format(netloc)
 
@@ -462,13 +454,46 @@ class repoView (object):
                 user, pw = console.login_alert('Enter credentials for {0}'.format(netloc), login=user)
                 #pw = getpass.getpass('Enter password for {0}: '.format(user))
 
-            opener = auth_urllib2_opener(None, result.url, user, pw)
+            opener = auth_urllib2_opener(None, remote, user, pw)
 
-            porcelain.push(repo.repo, result.url, branch_name, opener=opener)
+            porcelain.push(repo.path, remote, branch_name, opener=opener)
             keychain.set_password(keychainservice, user, pw)
 
         else:
             porcelain.push(repo.repo, result.url, branch_name)
+        console.hud_alert('pushed')
+
+
+def auth_urllib2_opener(config, top_level_url, username, password):
+    if config is not None:
+        proxy_server = config.get("http", "proxy")
+    else:
+        proxy_server = None
+
+    # create a password manager
+        password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+
+        # Add the username and password.
+        # If we knew the realm, we could use it instead of None.
+        #top_level_url = "http://example.com/foo/"
+        password_mgr.add_password(None, top_level_url, username, password)
+
+        handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+
+    handlers = [handler]
+    if proxy_server is not None:
+        handlers.append(urllib2.ProxyHandler({"http": proxy_server}))
+    opener = urllib2.build_opener(*handlers)
+    if config is not None:
+        user_agent = config.get("http", "useragent")
+    else:
+        user_agent = None
+    if user_agent is None:
+        user_agent = default_user_agent_string()
+    opener.addheaders = [('User-agent', user_agent)]
+    return opener
+
+
 
 
 r=repoView()

@@ -1,21 +1,23 @@
 
 import os,sys
 
-DULWICH_URL='https://github.com/jelmer/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
+#DULWICH_URL='https://github.com/jelmer/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
 GITTLE_URL='https://github.com/FriendCode/gittle/archive/master.tar.gz#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
 FUNKY_URL='https://github.com/FriendCode/funky/archive/master.tar.gz#module_name=funky&module_path=funky*/funky&move_to=site-packages&save_as=funky.tar.gz'
+
+DULWICH_URL='https://github.com/transistor1/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
 
 def _progress(tot):
     print 'Downloaded {0} bytes'.format(tot)
     
 def main():
     #Make sure you order these in terms of what is needed first
-    for i in [FUNKY_URL, DULWICH_URL, GITTLE_URL, GITVIEW_URL]:
+    for i in [FUNKY_URL, DULWICH_URL, GITTLE_URL]:
         installer = ModuleInstaller(i, 
             root_dir=os.path.expanduser('~/Documents'))
         print "Importing " + installer.module_name
         #installer.try_import_or_install(overwrite_existing=True, progress_func=_progress)
-        installer.module_install(overwrite_existing=False, progress_func=_progress)
+        installer.module_install(overwrite_existing=True, progress_func=_progress)
 
 
 #Imports for ModuleInstaller
