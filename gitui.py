@@ -352,11 +352,11 @@ class repoView (object):
         except IndexError, KeyError:
             return '',''
 
-    def checkout(self):
+    def checkout(self,sender):
         repo =self._get_repo()
         cwd=os.path.abspath('.')
         os.chdir(r._get_repo().path)
-        #repo.clean_working()
+        repo.clean_working()
         repo.switch_branch(self.view['branch'].text)
         self.refresh()
         os.chdir(cwd)
