@@ -9,6 +9,8 @@
         show log, diff, and open old ref
         merge
         display last commit time
+        pull table out as separate view
+        encapsulate and organize
         '''
 import ui,os,console, editor
 
@@ -410,9 +412,10 @@ class repoView (object):
             uri=remote
             #Set the origin
             config = repo.repo.get_config()
-            config.set(('remote','origin_manual'),'url',uri)
+            config.set(('remote','origin'),'url',uri)
             config.write_to_path()
         repo.pull(origin_uri=uri)
+        console.hud_alert()
         self.refresh()
     @ui.in_background
     def push_action(self,sender):
