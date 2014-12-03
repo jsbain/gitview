@@ -194,7 +194,7 @@ class repoView (object):
             if parent == path:
                 return None
             else:
-                return _find_repo(parent)
+                return self._find_repo(parent)
     def confirm(self,fcn,title='Are you sure?'):
         d=UIDialog(root=self.view,title=title,items={},ok_action=fcn)
         d.ok.title='Yes'
