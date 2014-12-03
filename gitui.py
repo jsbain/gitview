@@ -409,13 +409,14 @@ class repoView (object):
         if remote in self.remotes_iterator():
             uri=repo.remotes.get(remote,'')
         else:
+            print remote, 'adding'
             uri=remote
             #Set the origin
             config = repo.repo.get_config()
             config.set(('remote','origin'),'url',uri)
             config.write_to_path()
         repo.pull(origin_uri=uri)
-        console.hud_alert()
+        console.hud_alert('pulled from ',remote) 
         self.refresh()
     @ui.in_background
     def push_action(self,sender):
