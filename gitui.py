@@ -372,6 +372,7 @@ class repoView (object):
         repo.switch_branch(self.view['branch'].text)
         self.refresh()
         os.chdir(cwd)
+        editor.open_file(editor.get_path())
         console.hud_alert('checked out')
         
     def create_branch(self):
