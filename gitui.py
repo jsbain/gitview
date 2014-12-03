@@ -339,6 +339,18 @@ class repoView (object):
             self.unstage_all()
             self.refresh()
             console.hud_alert('branch')
+        elif branch in self._repo():
+            
+            indexfile = repo.repo.index_path()
+
+            tree = repo.repo[branch].tree
+
+            repo.index.build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
+            
+            #self._repo().refs.set_symbolic_ref('HEAD', branch)
+            #self.unstage_all()
+            #self.refresh()
+            console.hud_alert('commitish')
         else:
             #todo: prompt to confirm
             self.create_branch() 
@@ -356,7 +368,7 @@ class repoView (object):
         repo =self._get_repo()
         cwd=os.path.abspath('.')
         os.chdir(r._get_repo().path)
-        repo.clean_working()
+        #repo.clean_working()
         repo.switch_branch(self.view['branch'].text)
         self.refresh()
         os.chdir(cwd)
@@ -369,7 +381,7 @@ class repoView (object):
         console.hud_alert( "Creating branch {0}".format(branch))
         repo.create_branch(repo.active_branch, branch, tracking=None)
         #Recursive call to checkout the branch we just created
-        self.checkout()
+        self.checkout(self)
 
     def pull_action(self,sender):
         if self.g:
@@ -418,6 +430,7 @@ class repoView (object):
         repo.pull(origin_uri=uri)
         console.hud_alert('pulled from ',remote) 
         self.refresh()
+        
     @ui.in_background
     def push_action(self,sender):
 
