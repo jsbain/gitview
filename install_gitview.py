@@ -2,7 +2,7 @@
 import os,sys
 
 #DULWICH_URL='https://github.com/jelmer/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
-GITTLE_URL='https://github.com/FriendCode/gittle/archive/master.tar.gz#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
+GITTLE_URL='https://github.com/jsbain/gittle/archive/master.tar.gz#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
 FUNKY_URL='https://github.com/FriendCode/funky/archive/master.tar.gz#module_name=funky&module_path=funky*/funky&move_to=site-packages&save_as=funky.tar.gz'
 
 DULWICH_URL='https://github.com/transistor1/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
