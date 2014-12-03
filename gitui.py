@@ -26,7 +26,7 @@ from repo_finder import FilteredDirDropdown
 from dropdown import DropdownView
 from dulwich import porcelain
 from dulwich.client import default_user_agent_string
-
+from dulwich.index import build_index_from_tree
 from gittle import Gittle
 import itertools
 import threading
@@ -343,9 +343,9 @@ class repoView (object):
             
             indexfile = repo.repo.index_path()
 
-            tree = repo.repo[branch].tree
+            tree = repo.repo[str(branch)].tree
 
-            repo.index.build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
+            build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
             
             #self._repo().refs.set_symbolic_ref('HEAD', branch)
             #self.unstage_all()
