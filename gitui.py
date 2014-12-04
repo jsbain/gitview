@@ -55,7 +55,7 @@ class repoView (object):
         #staged rm
         #staged modify
         #unmodified 
-       # self.g=self._get_repo()
+        self.g=self._get_repo()
         def refresh_thread():
              if self.g:
                 self.list[0]=list(self.g.untracked_files)
@@ -99,15 +99,15 @@ class repoView (object):
         cell.text_label.text = self.label_for_cell(section,row)
         cvf=cell.content_view.frame
         def delact(sender):
-            porcelain.rm(self.g.path,[str(self.list[section][row])])
+            porcelain.rm(self._repo(),[str(self.list[section][row])])
             self.refresh()
             console.hud_alert('del {} {}'.format(section,row))
         def unstage(sender):
-            self.unstage(self.g.path,[str(self.list[section][row])])
+            self.unstage(self._repo(),[str(self.list[section][row])])
             self.refresh()
             console.hud_alert('unstage {} {}'.format(section,row))
         def addact(sender):
-            porcelain.add(self.g.path,str(self.list[section][row]))
+            porcelain.add(self._repo(),str(self.list[section][row]))
             self.refresh()
             console.hud_alert('add')
         def openact(sender):
