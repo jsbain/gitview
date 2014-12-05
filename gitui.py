@@ -114,7 +114,21 @@ class repoView (object):
             full_file=os.path.join(self._repo_path(),str(self.list[section][row]))
             editor.open_file(full_file)
             console.hud_alert('open')
-            console.hide_output()
+            console.hide_output()         
+        def diffact(sender):
+            console.hud_alert('diff')
+            try:
+                difftxt=[x['diff'] for x in self.g.diff_working() if x['new']['path']==str(self.list[section][row])]
+                sys.stdout.write(difftxt[0])
+            except ValueError,KeyError:
+                print 'uhhhh'
+        if section in (1,4):
+            b=ui.Button(frame=(cvf[2]-32*5.5,0,32,cvf[3]))
+            b.image=ui.Image.named('ionicons-arrow-swap-32')
+            b.tint_color=(0.00, 0.50, 0.50)
+            b.flex='ltb'
+            cell.content_view.add_subview(b)
+            b.action=diffact
         if section in (0,1,3):
             b=ui.Button(frame=(cvf[2]-32,0,32,cvf[3]))
             b.image=ui.Image.named('ionicons-plus-32')
@@ -540,10 +554,8 @@ if repo_path:
     rel_repo_path=os.path.relpath(editorpath,v['repo'].base)
     v['repo'].text=rel_repo_path
     
-    
+
 v.present('panel')
-
-r.did_select_repo(v['repo'])
-
-
+if v['repo'].text:
+    r.did_select_repo(v['repo'])
 
