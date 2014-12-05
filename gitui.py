@@ -28,9 +28,11 @@ from dulwich import porcelain
 from dulwich.client import default_user_agent_string
 from dulwich.index import build_index_from_tree
 from gittle import Gittle
+
+import git_diff
 import itertools
 import threading
-
+import functools 
 import keychain
 import posix
 import urlparse,urllib2   #for push
@@ -121,13 +123,25 @@ class repoView (object):
                 sys.stdout.write(difftxt[0])
             except ValueError,KeyError:
                 print 'uhhhh'
+        def diffacthtml(sender,difftype=git_diff.source.PATH):
+            f=git_diff.diff_working(self._repo(),str(self.list[section][row]),difftype)
+            w=ui.WebView(frame=self.view.frame)
+            difftypestr={git_diff.source.PATH:'working file',
+                         git_diff.source.INDEX:'staged change',
+                         git_diff.source.PREV:'previous rev change'}
+            w.name='diff'
+            w.load_html(f)
+            w.present('popover')
         if section in (1,4):
             b=ui.Button(frame=(cvf[2]-32*5.5,0,32,cvf[3]))
             b.image=ui.Image.named('ionicons-arrow-swap-32')
             b.tint_color=(0.00, 0.50, 0.50)
             b.flex='ltb'
             cell.content_view.add_subview(b)
-            b.action=diffact
+            if section==1:
+                b.action=diffacthtml
+            else:
+                b.action=functools.partial(diffacthtml,difftype=git_diff.source.INDEX)
         if section in (0,1,3):
             b=ui.Button(frame=(cvf[2]-32,0,32,cvf[3]))
             b.image=ui.Image.named('ionicons-plus-32')
