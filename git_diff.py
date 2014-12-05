@@ -23,7 +23,7 @@ def diff_working(repo,file,src=source.PATH):
     h=HtmlDiff(wrapcolumn=70,tabsize=4)
     if src==source.PATH:
         f=h.make_file(tree_ver.splitlines(),local_ver.splitlines(), file, 'last commit:'+repo.head())
-    elif source==source.INDEX:
+    elif src==source.INDEX:
         index_ver=store[index._byname[file].sha].data
         f=h.make_file(tree_ver.splitlines(),index_ver.splitlines(),file+' staged change', 'last commit'+repo.head())
     else:
