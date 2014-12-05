@@ -39,10 +39,9 @@ from uidialog import UIDialog
 SAVE_PASSWORDS=True
 class repoView (object):
     def __init__(self):
-        self.g=None
-        self.g_original=None
-        self.view=None
-        self.list=[[],[],[],[],[],[]]
+        self.g=None    #gittle instance
+        self.view=None #main view
+        self.list=[[],[],[],[],[],[]] #cached git status
         
     def _object_store(self):
         return self.g.repo.object_store
