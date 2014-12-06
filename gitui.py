@@ -475,7 +475,7 @@ class repoView (object):
 
         branch_name = os.path.join('refs','heads', repo.active_branch)  #'refs/heads/%s' % repo.active_branch
         # tODO  use remote branch_name 
-        print "Attempting to push to: {0}, branch: {1}".format(remote, branch_name)
+
 
         netloc = urlparse.urlparse(remote).netloc
 
@@ -483,6 +483,7 @@ class repoView (object):
 
         #define some callbacks for use by uidialog
         def push_callback(user,pw):
+            print "Attempting to push to: {0}, branch: {1}".format(remote, branch_name)
             if user:
                 opener = auth_urllib2_opener(None, remote, user, pw)
                 porcelain.push(repo.path, remote, branch_name, opener=opener)
