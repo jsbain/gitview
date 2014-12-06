@@ -123,9 +123,13 @@ class secure_text_delegate():
     def __init__(self):
         self.text=''
     def textfield_should_change(self, textfield, rng, replacement):
-        self.text=self.text[0:rng[0]]+replacement+self.text[rng[1]:]     
-        textfield.text=textfield.text[0:rng[0]]+'*'*len(replacement)+textfield.text[rng[1]:]
-        return False
+        ui.cancel_delays()
+        self.text=self.text[0:rng[0]]+replacement+self.text[rng[1]:]
+        def replace_with_star() :
+            #textfield.text=textfield.text[0:rng[0]]+'*'*len(replacement)+textfield.text[rng[1]:]
+            textfield.text=len(self.text)*'*'
+        ui.delay(replace_with_star,0.25)
+        return True
         
 if __name__=='__main__':
     r=ui.View(bg_color='white')
