@@ -36,7 +36,7 @@ import functools
 import keychain
 import posix
 import urlparse,urllib2   #for push
-from uidialog import UIDialog
+from uidialog import UIDialog, secure_text_delegate
 
 SAVE_PASSWORDS=True
 class repoView (object):
@@ -458,10 +458,14 @@ class repoView (object):
         repo.pull(origin_uri=uri)
         console.hud_alert('pulled from ',remote) 
         self.refresh()
-        
+    
+    def get_pass(self,netloc,callback):
+        d=UIDialog(root=self.view,title='enter credentials for {}'.format(netloc),items=dict.fromkeys(['username','password']),ok_action=callback)
+        d['scrollview']['password'].delegate=secure_text_delegate()
+ 
     @ui.in_background
     def push_action(self,sender):
-
+       # pdb.set_trace()
         user, sep, pw =  (None,None,None)
         repo = self._get_repo()
         
@@ -477,37 +481,28 @@ class repoView (object):
 
         keychainservice = 'shellista.git.{0}'.format(netloc)
 
-        if sep and not user:
-            # -u : clears keychain for this server
-            for service in keychain.get_services():
-                if service[0]==keychainservice:
-                    keychain.delete_password(*service)
-
+        #define some callbacks for use by uidialog
+        def push_callback(user,pw):
+            if user:
+                opener = auth_urllib2_opener(None, remote, user, pw)
+                porcelain.push(repo.path, remote, branch_name, opener=opener)
+                keychain.set_password(keychainservice, user, pw)
+            else:
+                porcelain.push(repo.repo, result.url, branch_name)
+            console.hud_alert('pushed')
+        def push_callback_dict(d):
+            push_callback(d['username'],d['password'])
+            
         #Attempt to retrieve user
-        if not user and SAVE_PASSWORDS:
-            try:
-                user = dict(keychain.get_services())[keychainservice]
-            except KeyError:
-                user, pw = console.login_alert('Enter credentials for {0}'.format(netloc))
-
-        if user:
-            if not pw and SAVE_PASSWORDS:
-                pw = keychain.get_password(keychainservice, user)
-
-            #Check again, did we retrieve a password?
-            if not pw:
-                user, pw = console.login_alert('Enter credentials for {0}'.format(netloc), login=user)
-                #pw = getpass.getpass('Enter password for {0}: '.format(user))
-
-            opener = auth_urllib2_opener(None, remote, user, pw)
-
-            porcelain.push(repo.path, remote, branch_name, opener=opener)
-            keychain.set_password(keychainservice, user, pw)
-
-        else:
-            porcelain.push(repo.repo, result.url, branch_name)
-        console.hud_alert('pushed')
-
+        try:
+            user = dict(keychain.get_services())[keychainservice]
+            pw = keychain.get_password(keychainservice, user)
+            if pw:
+                push_callback(user,pw)
+            else:
+                raise KeyError
+        except KeyError:
+            self.get_pass(netloc,push_callback_dict)
 
 def auth_urllib2_opener(config, top_level_url, username, password):
     if config is not None:

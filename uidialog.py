@@ -93,7 +93,13 @@ class UIDialog(ui.View):
         ui.animate(ani,0.15)
         self.overlay=overlay
     def as_dict(self):
-        return {item.name:item.text for item in self.textfields}
+        d={}
+        for item in self.textfields:
+            if item.delegate and hasattr(item.delegate,'text'):
+                d[item.name]=item.delegate.text
+            else:
+                d[item.name]=item.text
+        return d
     def do_close(self):
         def ani():
             self.width=10
@@ -113,7 +119,13 @@ class UIDialog(ui.View):
         if callable(self.cancel_action):
             self.cancel_action(self.as_dict())
 
-
+class secure_text_delegate():
+    def __init__(self):
+        self.text=''
+    def textfield_should_change(self, textfield, rng, replacement):
+        self.text=self.text[0:rng[0]]+replacement+self.text[rng[1]:]     
+        textfield.text=textfield.text[0:rng[0]]+'*'*len(replacement)+textfield.text[rng[1]:]
+        return False
         
 if __name__=='__main__':
     r=ui.View(bg_color='white')
@@ -123,8 +135,8 @@ if __name__=='__main__':
         print 'ok'
     def cancel(somedict):
         print 'cancel'
-    d=UIDialog(root=r,title='enter some info',items=dict.fromkeys(['remote url','local path']),ok_action=ok,cancel_action=cancel)
-
+    d=UIDialog(root=r,title='enter some info',items=dict.fromkeys(['username','pass']),ok_action=ok,cancel_action=cancel)
+    d['scrollview']['pass'].delegate=secure_text_delegate()
  
 
 
