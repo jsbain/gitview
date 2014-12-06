@@ -504,7 +504,26 @@ class repoView (object):
                 raise KeyError
         except KeyError:
             self.get_pass(netloc,push_callback_dict)
+    def resetPW(self,sender):
+        repo = self._get_repo()
+        
+        remote=self.view['remote'].text
+        if remote in self.remotes_iterator():
+            remote = repo.remotes.get(remote,'')
 
+        branch_name = os.path.join('refs','heads', repo.active_branch)  #'refs/heads/%s' % repo.active_branch
+        # tODO  use remote branch_name 
+
+
+        netloc = urlparse.urlparse(remote).netloc
+
+        keychainservice = 'shellista.git.{0}'.format(netloc)
+        try:
+            user = dict(keychain.get_services())[keychainservice]
+            keychain.delete_password(keychainservice,user)
+            console.hud_alert('removed password for {}@{}'.format( user,netloc))
+        except KeyError:
+            console.hud_alert('no saved auth for {}'.format( netloc))
 def auth_urllib2_opener(config, top_level_url, username, password):
     if config is not None:
         proxy_server = config.get("http", "proxy")
@@ -554,6 +573,7 @@ v['pull'].action=r.pull_action
 v['push'].action=r.push_action
 v['clone'].action=r.clone_action
 v['new'].action=r.new_action
+v['resetPW'].action=r.resetPW
 #load current repo
 editorpath=os.path.split(editor.get_path())[0]
 if editorpath.startswith('/var'):
