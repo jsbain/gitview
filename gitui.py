@@ -483,14 +483,14 @@ class repoView (object):
 
         #define some callbacks for use by uidialog
         def push_callback(user,pw):
-            print "Attempting to push to: {0}, branch: {1}".format(remote, branch_name)
+            console.hud_alert( "Attempting to push to: {0}, branch: {1}".format(remote, branch_name))
             if user:
                 opener = auth_urllib2_opener(None, remote, user, pw)
                 porcelain.push(repo.path, remote, branch_name, opener=opener)
                 keychain.set_password(keychainservice, user, pw)
             else:
                 porcelain.push(repo.repo, result.url, branch_name)
-            console.hud_alert('pushed')
+            console.hud_alert('push complete')
         def push_callback_dict(d):
             push_callback(d['username'],d['password'])
             
