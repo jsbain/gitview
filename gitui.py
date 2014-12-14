@@ -121,8 +121,8 @@ class repoView (object):
             try:
                 difftxt=[x['diff'] for x in self.g.diff_working() if x['new']['path']==str(self.list[section][row])]
                 sys.stdout.write(difftxt[0])
-            except ValueError,KeyError:
-                print 'uhhhh'
+            except (ValueError,KeyError):
+                console.hud_alert('could not create a diff, for some strange reason!')
         def diffacthtml(sender,difftype=git_diff.source.PATH):
             f=git_diff.diff_working(self._repo(),str(self.list[section][row]),difftype)
             w=ui.WebView(frame=self.view.frame)
@@ -289,7 +289,7 @@ class repoView (object):
             elif last_commit.committer:
                 author,author_email=(last_commit.committer.split('>')[0]+'<').split('<')[0:2]
             return author,author_email
-        except KeyError, AttributeError:
+        except (KeyError, AttributeError):
             return '',''
     def commit(self,sender):
         if list(itertools.chain(*porcelain.status(self.g.path).staged.itervalues())):
@@ -388,7 +388,7 @@ class repoView (object):
             head=self._repo().head()
             remote, remote_branch=[ k.split('/')[-2:]  for k,v in refs if v==head and k.startswith('refs/remotes')][0]
             return remote,remote_branch
-        except IndexError, KeyError:
+        except (IndexError, KeyError):
             return '',''
 
     def checkout(self,sender):
@@ -420,7 +420,9 @@ class repoView (object):
         remote=clonedict['remote url']
         local=clonedict['local path']
         repo_name= os.path.join(self.view['repo'].base, local)
-
+        if not local:
+            console.hud_alert('you must define a local path','error')
+            return
         if remote:
             try:
                 repo = Gittle.clone(remote, repo_name, bare=False)
@@ -432,14 +434,18 @@ class repoView (object):
                 self.view['repo'].txt=repo_name
                 self.refresh()
             except Exception as e:
-                console.hud_alert(e.message)
+                console.hud_alert(e.message,'error')
         
     def clone_action(self,sender):
         d=UIDialog(root=self.view,title='Clone repo',items={'remote url':'https://github.com/','local path':''},ok_action=self.clone)
         
     def new_action(self,sender):
         def ok(somedict):
-            self.init_repo(somedict['repo name'])
+            reponame=somedict['repo name']
+            if reponame:
+                self.init_repo(reponame)
+            else:
+                console.hud_alert('No repo created, name was blank!','error')
         d=UIDialog(root=self.view,title='Clone repo',items={'repo name':''},ok_action=ok)
         
     def pull(self):
@@ -526,6 +532,18 @@ class repoView (object):
             console.hud_alert('removed password for {}@{}'.format( user,netloc))
         except KeyError:
             console.hud_alert('no saved auth for {}'.format( netloc))
+    def log_action(self,sender):
+        import StringIO
+        s=StringIO.StringIO()
+        w=ui.WebView(frame=self.view.frame)
+        w.name='Log'
+        porcelain.log(self._repo().path, outstream=s)
+        log=s.getvalue()
+        log=log.replace('\n','<p>')
+        #print log
+        w.load_html(log)
+        w.present('popover')
+        
 def auth_urllib2_opener(config, top_level_url, username, password):
     if config is not None:
         proxy_server = config.get("http", "proxy")
@@ -556,8 +574,6 @@ def auth_urllib2_opener(config, top_level_url, username, password):
     return opener
 
 
-
-
 r=repoView()
 v=ui.load_view('gitui')
 r.view=v
@@ -576,6 +592,7 @@ v['push'].action=r.push_action
 v['clone'].action=r.clone_action
 v['new'].action=r.new_action
 v['resetPW'].action=r.resetPW
+v['log'].action=r.log_action
 #load current repo
 editorpath=os.path.split(editor.get_path())[0]
 if editorpath.startswith('/var'):
