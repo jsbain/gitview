@@ -419,7 +419,7 @@ class repoView (object):
         if not local:
             console.hud_alert('you must define a local path','error')
             return
-        if remote:
+        if remote and not remote=='https://github.com/':
             try:
                 repo = Gittle.clone(remote, repo_name, bare=False)
         
@@ -431,7 +431,8 @@ class repoView (object):
                 self.refresh()
             except Exception as e:
                 console.hud_alert(e.message,'error')
-        
+        else:
+            console.hud_alert('You must specify a valid repo to clone','error')
     def clone_action(self,sender):
         d=UIDialog(root=self.view,title='Clone repo',items={'remote url':'https://github.com/','local path':''},ok_action=self.clone)
         
