@@ -13,13 +13,9 @@
         encapsulate and organize
         '''
 import ui,os,console, editor
-
-### temporary during development
 import dropdown
-reload(dropdown)
 import repo_finder
-reload(repo_finder)
-###
+
 
 from repo_finder import FilteredDirDropdown
 
