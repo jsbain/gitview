@@ -12,27 +12,31 @@
         pull table out as separate view
         encapsulate and organize
         '''
-import ui,os,console, editor
+import ui, os, console, editor
+
+#custom ui modules
 import dropdown
 import repo_finder
-
-
 from repo_finder import FilteredDirDropdown
-
 from dropdown import DropdownView
+from uidialog import UIDialog, secure_text_delegate
+
+#custom git differ
+import git_diff
+
+#repo management
 from dulwich import porcelain
 from dulwich.client import default_user_agent_string
 from dulwich.index import build_index_from_tree
 from gittle import Gittle
 
-import git_diff
-import itertools
-import threading
-import functools 
-import keychain
-import posix
+#misc other modules
+import itertools     #chain
+import functools     #partial
+import keychain     #for auth saving
+import posix        #lstat
 import urlparse,urllib2   #for push
-from uidialog import UIDialog, secure_text_delegate
+
 
 SAVE_PASSWORDS=True
 class repoView (object):
@@ -67,7 +71,6 @@ class repoView (object):
                 #self.view['tableview1'].reload()
                 self.list[5]=list(self.g.tracked_files-set(itertools.chain(*self.list[1:4])))
 
-        #threading.Thread(target=refresh_thread).start()
         refresh_thread()
     def refresh(self):
         # update internal table shit
@@ -200,10 +203,13 @@ class repoView (object):
         return os.path.join(self.view['repo'].base, self.view['repo'].text)
         
     def _get_repo(self):
-        try:
-            return Gittle(self._find_repo(self._repo_path()))
-        except:
-            return None
+            try:
+                repopath=self._repo_path()
+                repobase=self._find_repo(repopath)
+                if repobase:
+                    return Gittle(repobase)
+            except:
+                return None
             
     def _find_repo(self,path):
         try:
@@ -218,26 +224,29 @@ class repoView (object):
                 return None
             else:
                 return self._find_repo(parent)
-    def confirm(self,fcn,title='Are you sure?'):
-        d=UIDialog(root=self.view,title=title,items={},ok_action=fcn)
+                
+    def confirm(self,fcn,title='Are you sure?',cancel_action=None):
+        d=UIDialog(root=self.view,title=title,items={},ok_action=fcn,cancel_action=cancel_action)
         d.ok.title='Yes'
+        
     def init_repo(self,repo_name):
         from shutil import rmtree
         gitpath=os.path.join(self.view['repo'].base,repo_name,'.git')
         if os.path.exists(gitpath):
             def fcn(somedict):
                 rmtree(gitpath)
-                self.init_repo_if_empty(repo_name,gitpath)
+                self.init_repo_if_empty(repo_name)
             self.confirm(fcn,'Repo already exists at {}. Erase?'.format(repo_name))
         else:
-            self.init_repo_if_empty(repo_name,gitpath)
-    def init_repo_if_empty(self,repo_name,gitpath):
-        if not os.path.exists(gitpath):
-            self.g= Gittle.init(gitpath,bare=False )
-            self.g.commit('name','email','initial commit')
-            self.view['repo'].text=repo_name
-            console.hud_alert('Repo {} created'.format(repo_name))
-            self.refresh()
+            self.init_repo_if_empty(repo_name)
+            
+    def init_repo_if_empty(self,repo_name):
+        repopath=os.path.join(self.view['repo'].base,repo_name)
+        self.g= Gittle.init(repopath,bare=False )
+        self.g.commit('name','email','initial commit')
+        self.view['repo'].text=repo_name
+        console.hud_alert('Repo {} created'.format(repo_name))
+        self.did_select_repo(self.view['repo'])
         
     def git_status(self,args):
         if len(args) == 0:
@@ -263,6 +272,7 @@ class repoView (object):
             return self.g.remote_branches.iterkeys()
             
     def did_select_repo(self,sender):
+
         self.g=self._get_repo()
         if self.g:
             r.view['branch'].text=self.g.active_branch
@@ -273,7 +283,7 @@ class repoView (object):
             self.view['remote'].text=remote
             self.view['remotebranch'].text=remote_branch
         else:
-            console.hud_alert('no repo here.  pull to clone')
+            console.hud_alert('No repo found at {}.  create new repo, or clone'.format(self.view['repo'].text))
             r.view['branch'].text=''
             self.g=None
         self.refresh()
@@ -420,27 +430,51 @@ class repoView (object):
             console.hud_alert('you must define a local path','error')
             return
         if remote and not remote=='https://github.com/':
+            #for github urls, force it to end in .git
+            if remote.find('github') and not remote.endswith('.git'):
+                remote=remote+'.git'
             try:
+                console.show_activity()
                 repo = Gittle.clone(remote, repo_name, bare=False)
-        
+                console.hide_activity()
                 #Set the origin
                 config = repo.repo.get_config()
                 config.set(('remote','origin'),'url',remote)
                 config.write_to_path()
-                self.view['repo'].txt=repo_name
-                self.refresh()
-            except Exception as e:
-                console.hud_alert(e.message,'error')
+                self.view['repo'].text=local
+                self.did_select_repo(self.view['repo'])
+                console.hud_alert('clone successful')
+            except urllib2.URLError:
+                console.hud_alert('invalid remote url. check url and try again','error')
+            except OSError:
+                def overwrite(items):
+                    import shutil
+                    shutil.rmtree(os.path.join(repo_name,'.git'))
+                    self.clone(clonedict)
+                def cancel(items):
+                    console.hud_alert('clone cancelled!','error')
+                self.confirm(overwrite,'{} already has a .git folder. Overwrite?'.format(local),cancel)
+            except:
+                console.hud_alert('failed to clone. check traceback','error')
+                raise
         else:
             console.hud_alert('You must specify a valid repo to clone','error')
     def clone_action(self,sender):
-        d=UIDialog(root=self.view,title='Clone repo',items={'remote url':'https://github.com/','local path':''},ok_action=self.clone)
+        import clipboard
+        remote='https://github.com/'
+        local=''
+        if clipboard.get().startswith('http'):
+            remote=clipboard.get()
+            local=os.path.split(urlparse.urlparse(remote).path)[-1]
+            local= local.split('.git')[0]  
+        d=UIDialog(root=self.view,title='Clone repo',items={'remote url':remote,'local path':local},ok_action=self.clone)
         
     def new_action(self,sender):
         def ok(somedict):
             reponame=somedict['repo name']
             if reponame:
                 self.init_repo(reponame)
+
             else:
                 console.hud_alert('No repo created, name was blank!','error')
         d=UIDialog(root=self.view,title='Clone repo',items={'repo name':''},ok_action=ok)
