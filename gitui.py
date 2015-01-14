@@ -110,6 +110,12 @@ class repoView (object):
         cell = ui.TableViewCell()
         cell.text_label.text = self.label_for_cell(section,row)
         cvf=cell.content_view.frame
+        def delfileact(sender):
+            def yes(sender):
+                os.remove(os.path.join(self._repo_path(),str(self.list[section][row])))
+                self.refresh()
+            self.confirm(yes,'this cannot be undone.\ndelete this file?')
+          #  console.hud_alert('del file {} {}'.format(section,row))
         def delact(sender):
             porcelain.rm(self._repo(),[str(self.list[section][row])])
             self.refresh()
@@ -143,6 +149,7 @@ class repoView (object):
             w.name='diff'
             w.load_html(f)
             w.present('popover')
+
         if section in (1,4):
             b=ui.Button(frame=(cvf[2]-32*5.5,0,32,cvf[3]))
             b.image=ui.Image.named('ionicons-arrow-swap-32')
@@ -174,7 +181,13 @@ class repoView (object):
             b.flex='ltb'
             cell.content_view.add_subview(b)
             b.action=delact
-        
+        if section in (0,):
+            b=ui.Button(frame=(cvf[2]-32*2.5,0,32,cvf[3]))
+            b.image=ui.Image.named('ionicons-close-32')
+            b.tint_color='red'
+            b.flex='ltb'
+            cell.content_view.add_subview(b)
+            b.action=delfileact
         b=ui.Button(frame=(cvf[2]-32*4.5,0,32,cvf[3]))
         b.image=ui.Image.named('ionicons-document-32')
         b.tint_color='gray'
