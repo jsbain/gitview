@@ -382,7 +382,7 @@ class repoView (object):
                 build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
                 self.refresh()
                 console.hud_alert('SHA has been checked out into working tree. ')
-            self.confirm(checkout_sha,'WARNING: this will erase all unstaged changes, and load an old sha.  are you sure? ')
+            self.confirm(checkout_sha,'WARNING: \nerase all unstaged changes?')
         else:
             self.confirm(self.create_branch,'do you want to create a new branch? ')
     def remote_for_head(self):

@@ -22,15 +22,18 @@ class UIDialog(ui.View):
         self.border_color='black'
         rowheight=32
         border=10
-        self.height=(len(items)*2+2)*rowheight + border*2
-        header=ui.Label(frame=(0,0,frame[2],rowheight),bg_color=(0.9,0.9,0.9))
+        titlelines=len(title.splitlines())
+        self.height=(len(items)*2+titlelines+1)*rowheight + border*2
+
+        header=ui.Label(frame=(0,0,frame[2],rowheight*titlelines),bg_color=(0.9,0.9,0.9))
+        header.number_of_lines=0
         header.text=title
         header.alignment=ui.ALIGN_CENTER
 
         self.add_subview(header)
         
         content_height=len(items)*2*rowheight
-        self.scroll=ui.ScrollView(frame=(border,rowheight,frame[2]-2*border,min(content_height,400)),name='scrollview')
+        self.scroll=ui.ScrollView(frame=(border,rowheight*titlelines,frame[2]-2*border,min(content_height,400)),name='scrollview')
         
         curry=0
         textfields=[]
@@ -139,7 +142,7 @@ if __name__=='__main__':
         print 'ok'
     def cancel(somedict):
         print 'cancel'
-    d=UIDialog(root=r,title='enter some info',items=dict.fromkeys(['username','pass']),ok_action=ok,cancel_action=cancel)
+    d=UIDialog(root=r,title='enter some \ninfo jihbihbiybiybiybiybiybiyb0b iuh iyb uybb  iyb uy  uyuy ',items=dict.fromkeys(['username','pass']),ok_action=ok,cancel_action=cancel)
     d['scrollview']['pass'].delegate=secure_text_delegate()
  
 
