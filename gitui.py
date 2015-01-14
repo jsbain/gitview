@@ -6,7 +6,6 @@
         auto install dulwich and gittle, as per shellista.. but install more recent dulwich
         make pull less dangerous.  currently, simply overwrites existing tree. maybe need fetch rather than pull, and locL merge ability...
         add delete button for untracked files, which actually deletes.
-        handle case where file was deleted
         
         merge
         display last commit time
@@ -77,8 +76,20 @@ class repoView (object):
         # update internal table shit
         #use porcelain status for staged, modified
         # gittle for untr and unmod  g.tracked_files -g.modified_files, g.untracked_files
-        self.refresh_gittle()
-        self.view['tableview1'].reload()
+        try:
+            self.refresh_gittle()
+            self.view['tableview1'].reload()
+        except OSError as e:
+            repo=self._get_repo()
+            path=repo.relpath(e.filename)
+            def try_to_fix(sender):
+                treeobj = repo[repo[str( 'refs/heads/'+self.view['branch'].text )].tree]
+                file_contents=repo[treeobj[path][1]].as_raw_string()
+                with open(str(path),'w') as f:
+                    f.write(file_contents)
+                self.refresh()
+            self.confirm(try_to_fix,'file {} not found\n recreate?'.format(path))
+
         #console.hud_alert('pull refresh')
         
     def tableview_number_of_sections(self, tableview):
