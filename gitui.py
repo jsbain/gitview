@@ -407,9 +407,14 @@ class repoView (object):
                 build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
                 self.refresh()
                 console.hud_alert('SHA has been checked out into working tree. ')
-            self.confirm(checkout_sha,'WARNING: this will \nerase all unstaged/untracked changes?')
+
+            self.confirm(checkout_sha,'WARNING: this will \nerase all unstaged/untracked changes?',self.revert_to_active_branch)
         else:
-            self.confirm(self.create_branch,'do you want to create a new branch? \n you will lose all unstaged/untracked files!!!!!')
+            self.confirm(self.create_branch,'do you want to create a new branch? \n you will lose all unstaged/untracked files!!!!!',self.revert_to_active_branch)
+            
+    def revert_to_active_branch(self):
+        self.view['branch'].text=_get_repo().repo.active_branch
+        
     def remote_for_head(self):
         refs=self._repo().refs.as_dict().iteritems()
 
