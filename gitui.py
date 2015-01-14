@@ -378,7 +378,7 @@ class repoView (object):
 
             tree = repo.repo[str(branch)].tree
             
-            def checkout_sha():
+            def checkout_sha(sender):
                 build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
                 self.refresh()
                 console.hud_alert('SHA has been checked out into working tree. ')
