@@ -591,6 +591,7 @@ class repoView (object):
             console.hud_alert('removed password for {}@{}'.format( user,netloc))
         except KeyError:
             console.hud_alert('no saved auth for {}'.format( netloc))
+
     def log_action(self,sender):
         import StringIO
         s=StringIO.StringIO()
@@ -602,6 +603,10 @@ class repoView (object):
         #print log
         w.load_html(log)
         w.present('popover')
+        
+    def log_action(self, sender):
+        import show_log
+        show_log.main(self)
         
 def auth_urllib2_opener(config, top_level_url, username, password):
     if config is not None:

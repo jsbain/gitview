@@ -52,13 +52,14 @@ class log_table(ui.View):
         tableview.set_editing(False )
         r.view['branch'].text=self.shas[section]
         r.branch_did_change(r)
+        tableview.close()
         #pass
 
-
-o=r._repo().object_store
-L=log_table(o)
-t=ui.TableView()
-t.row_height=75
-t.data_source=L
-t.delegate=L
-t.present('sheet')
+def main(r):
+    o=r._repo().object_store
+    L=log_table(o)
+    t=ui.TableView()
+    t.row_height=75
+    t.data_source=L
+    t.delegate=L
+    t.present('sheet')
