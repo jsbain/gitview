@@ -6,7 +6,8 @@
         auto install dulwich and gittle, as per shellista.. but install more recent dulwich
         make pull less dangerous.  currently, simply overwrites existing tree. maybe need fetch rather than pull, and locL merge ability...
         add delete button for untracked files, which actually deletes.
-        show log, diff, and open old ref
+        handle case where file was deleted
+        
         merge
         display last commit time
         pull table out as separate view
@@ -382,9 +383,9 @@ class repoView (object):
                 build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
                 self.refresh()
                 console.hud_alert('SHA has been checked out into working tree. ')
-            self.confirm(checkout_sha,'WARNING: \nerase all unstaged changes?')
+            self.confirm(checkout_sha,'WARNING: this will \nerase all unstaged/untracked changes?')
         else:
-            self.confirm(self.create_branch,'do you want to create a new branch? ')
+            self.confirm(self.create_branch,'do you want to create a new branch? \n you will lose all unstaged/untracked files!!!!!')
     def remote_for_head(self):
         refs=self._repo().refs.as_dict().iteritems()
 
@@ -406,7 +407,7 @@ class repoView (object):
         editor.open_file(editor.get_path())
         console.hud_alert('checked out')
         
-    def create_branch(self):
+    def create_branch(self,dummy):
         #TODO: Add tracking as a parameter
         repo=self._get_repo()
         branch=self.view['branch'].text
