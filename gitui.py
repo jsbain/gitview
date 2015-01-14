@@ -377,8 +377,6 @@ class repoView (object):
             indexfile = repo.repo.index_path()
 
             tree = repo.repo[str(branch)].tree
-
-            build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
             
             def checkout_sha():
                 build_index_from_tree(repo.repo.path, indexfile, repo.repo.object_store, tree)
