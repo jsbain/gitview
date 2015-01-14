@@ -412,8 +412,8 @@ class repoView (object):
         else:
             self.confirm(self.create_branch,'do you want to create a new branch? \n you will lose all unstaged/untracked files!!!!!',self.revert_to_active_branch)
             
-    def revert_to_active_branch(self):
-        self.view['branch'].text=_get_repo().repo.active_branch
+    def revert_to_active_branch(self,sender):
+        self.view['branch'].text=self._get_repo().active_branch
         
     def remote_for_head(self):
         refs=self._repo().refs.as_dict().iteritems()

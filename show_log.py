@@ -2,12 +2,13 @@ import time, textwrap,ui
 import dulwich.objects
 
 class log_table(ui.View):
-    def __init__(self,objstore):
-        o=objstore
-        self.o=objstore
-        shas=[sha for sha in o if isinstance(o[sha] , dulwich.objects.Commit)]
+    def __init__(self,r):
+        self.r=r
+        #takes gitview repo object r
+        self.o=r._repo().object_store
+        shas=[sha for sha in self.o if isinstance(self.o[sha] , dulwich.objects.Commit)]
 
-        self.shas=sorted(shas,key=lambda x:o[x].commit_time )
+        self.shas=sorted(shas,key=lambda x:self.o[x].commit_time , reverse=True)
         #self.commits=[(x,time.ctime(o[x].commit_time),o[x].author,os[x].message) for x in shas]
 
     def tableview_number_of_sections(self, tableview):
@@ -50,16 +51,17 @@ class log_table(ui.View):
     def tableview_delete(self, tableview, section, row):
         # Called when the user confirms deletion of the given row.
         tableview.set_editing(False )
-        r.view['branch'].text=self.shas[section]
-        r.branch_did_change(r)
+        self.r.view['branch'].text=self.shas[section]
+        self.r.branch_did_change(self.r)
         tableview.close()
         #pass
 
 def main(r):
-    o=r._repo().object_store
-    L=log_table(o)
+
+    L=log_table(r)
     t=ui.TableView()
     t.row_height=75
     t.data_source=L
     t.delegate=L
     t.present('sheet')
+
