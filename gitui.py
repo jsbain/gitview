@@ -385,20 +385,30 @@ class repoView (object):
             
         for entry in index.iteritems():
             self.unstage(self._repo(),[entry[0]])
-        
+            
+    def has_uncommitted_changes(self):
+        if(porcelain.status(self.g.path).unstaged or
+            porcelain.status(self.g.path).staged['add'] or 
+            porcelain.status(self.g.path).staged['modify'] or
+            porcelain.status(self.g.path).staged['delete']):
+                return True
+            
     def branch_did_change(self,sender):
         # set head to branch
         repo=self._get_repo()
         branch=self.view['branch'].text
         if branch==repo.active_branch:
             return
-        if branch in self.branch_iterator():
-            self._repo().refs.set_symbolic_ref('HEAD', 'refs/heads/'+branch)
-            self.unstage_all()
-            self.refresh()
-            console.hud_alert('branch')
-        elif branch in self._repo():
-            
+        if branch in self.branch_iterator():        
+            def switch_branch():
+                self._repo().refs.set_symbolic_ref('HEAD', 'refs/heads/'+branch)
+                self.unstage_all()
+                self.refresh()
+                console.hud_alert('branch')       
+            if self.has_uncommitted_changes():
+                self.confirm(switch_branch,'WARNING: there are uncommitted changes. \ncontinue anyway?',self.revert_to_active_branch)
+
+        elif branch in self._repo():  #sha
             indexfile = repo.repo.index_path()
 
             tree = repo.repo[str(branch)].tree
