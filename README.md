@@ -30,9 +30,10 @@ run gitui to run
 todo
 ====
 handle remote branches better in pull
-log browser
-warnings/confirmations for certain actions that can wipe out changes, like checkout and clone
-modularize /organize code bettery.  pull out the change table into another class at least
+three way merge. merge_head, etc
+log browser improvements
+restructure code
+sidebar or menubar when editing code, allowing quick commit!
 
 
                                                                                                         
