@@ -5,7 +5,7 @@ import os,sys
 GITTLE_URL='https://github.com/jsbain/gittle/archive/master.tar.gz#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
 FUNKY_URL='https://github.com/FriendCode/funky/archive/master.tar.gz#module_name=funky&module_path=funky*/funky&move_to=site-packages&save_as=funky.tar.gz'
 
-DULWICH_URL='https://github.com/transistor1/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
+DULWICH_URL='https://github.com/jsbain/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
 
 def _progress(tot):
     print 'Downloaded {0} bytes'.format(tot)

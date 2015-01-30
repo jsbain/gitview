@@ -63,5 +63,6 @@ def main(r):
     t.row_height=75
     t.data_source=L
     t.delegate=L
+    t.frame=(44.0, 44.0, 540.0, 576.0)
     t.present('sheet')
 
