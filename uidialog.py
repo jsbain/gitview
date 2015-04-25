@@ -81,7 +81,7 @@ class UIDialog(ui.View):
     def open_dialog(self,sender):
         # expand out a view/dialog from sender
         root=self.find_root(self.root)
-        overlay=ui.Button(frame=(0,0)+root.frame[2:],bg_color=(0,0,0,0.25),name='overlay')
+        overlay=ui.Button(frame=(0,0)+tuple(root.frame)[2:],bg_color=(0,0,0,0.25),name='overlay')
         overlay.action=self.dispatch_cancel_action
         finalframe=self.frame
         self.width=5
@@ -145,5 +145,3 @@ if __name__=='__main__':
     d=UIDialog(root=r,title='enter some \ninfo jihbihbiybiybiybiybiybiyb0b iuh iyb uybb  iyb uy  uyuy ',items=dict.fromkeys(['username','pass']),ok_action=ok,cancel_action=cancel)
     d['scrollview']['pass'].delegate=secure_text_delegate()
  
-
-
