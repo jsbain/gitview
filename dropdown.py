@@ -44,7 +44,7 @@ class DropdownView(ui.View):
     def open_finder(self,sender):
         # expand out a view/dialog from sender
         root=self.find_root()
-        overlay=ui.Button(frame=(0,0)+root.frame[2:],bg_color=(0,0,0,0.25),name='overlay')
+        overlay=ui.Button(frame=(0,0)+tuple(root.frame)[2:],bg_color=(0,0,0,0.25),name='overlay')
         dialog=ui.View(frame=sender.frame,bg_color='white',name='dialog')
         self.tbl=ui.TableView()
         self.tbl.width=dialog.width
@@ -88,7 +88,7 @@ class DropdownView(ui.View):
             except ValueError:
                 #self.listsource.selected_row=-1
                 self.listsource.tableview.selected_row=(0,-1)
-            self.tbl.content_offset=offset
+            self.tbl.content_offset=tuple(offset)
           ui.animate(ani,0.1)
         console.hide_activity()
                     
