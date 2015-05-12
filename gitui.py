@@ -561,9 +561,14 @@ class repoView (object):
             print  "Attempting to push to: {0}, branch: {1}".format(remote, branch_name)
             console.show_activity()
             if user:
-                opener = auth_urllib2_opener(None, remote, user, pw)
-                porcelain.push(repo.path, remote, branch_name, opener=opener)
-                keychain.set_password(keychainservice, user, pw)
+               try:
+                  opener = auth_urllib2_opener(None, remote, user, pw)
+                  porcelain.push(repo.path, remote, branch_name, opener=opener)
+                  keychain.set_password(keychainservice, user, pw)
+               except urllib2.URLError:
+                  console.hide_activity()
+                  console.hud_alert('push failed','error')
+                  return
             else:
                 porcelain.push(repo.repo, result.url, branch_name)
             console.hide_activity()
@@ -680,4 +685,3 @@ if repo_path:
 v.present('panel')
 if v['repo'].text:
     r.did_select_repo(v['repo'])
-
