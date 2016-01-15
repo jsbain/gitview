@@ -562,8 +562,12 @@ class repoView (object):
             console.show_activity()
             if user:
                try:
-                  opener = auth_urllib2_opener(None, remote, user, pw)
-                  porcelain.push(repo.path, remote, branch_name, opener=opener)
+                  parsedurl=urlparse.urlparse(remote)
+                  host_with_auth='{}:{}@{}'.format( 
+                                  user,pw,parsedurl.netloc)
+                  url=urlparse.urlunparse(
+                      parsedurl._replace( netloc=host_with_auth))
+                  porcelain.push(repo.path, url, branch_name)
                   keychain.set_password(keychainservice, user, pw)
                except urllib2.URLError:
                   console.hide_activity()
@@ -623,34 +627,6 @@ class repoView (object):
         import show_log
         show_log.main(self)
         
-def auth_urllib2_opener(config, top_level_url, username, password):
-    if config is not None:
-        proxy_server = config.get("http", "proxy")
-    else:
-        proxy_server = None
-
-    # create a password manager
-        password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-
-        # Add the username and password.
-        # If we knew the realm, we could use it instead of None.
-        #top_level_url = "http://example.com/foo/"
-        password_mgr.add_password(None, top_level_url, username, password)
-
-        handler = urllib2.HTTPBasicAuthHandler(password_mgr)
-
-    handlers = [handler]
-    if proxy_server is not None:
-        handlers.append(urllib2.ProxyHandler({"http": proxy_server}))
-    opener = urllib2.build_opener(*handlers)
-    if config is not None:
-        user_agent = config.get("http", "useragent")
-    else:
-        user_agent = None
-    if user_agent is None:
-        user_agent = default_user_agent_string()
-    opener.addheaders = [('User-agent', user_agent)]
-    return opener
 
 
 r=repoView()

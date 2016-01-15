@@ -2,10 +2,11 @@
 import os,sys
 
 #DULWICH_URL='https://github.com/jelmer/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
-GITTLE_URL='https://github.com/jsbain/gittle/archive/master.tar.gz#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
-FUNKY_URL='https://github.com/FriendCode/funky/archive/master.tar.gz#module_name=funky&module_path=funky*/funky&move_to=site-packages&save_as=funky.tar.gz'
 
-DULWICH_URL='https://github.com/jsbain/dulwich/archive/master.tar.gz#module_name=dulwich&module_path=dulwich-master/dulwich&move_to=site-packages'
+GITTLE_URL='https://github.com/jsbain/gittle/archive/master.zip#module_name=gittle&module_path=gittle-*/gittle&move_to=site-packages'
+FUNKY_URL='https://github.com/FriendCode/funky/archive/master.zip#module_name=funky&module_path=funky*/funky&move_to=site-packages&save_as=funky.tar.gz'
+DULWICH_URL='https://github.com/jsbain/dulwich/archive/ForStaSH_0.12.2.zip#module_name=dulwich&module_path=dulwich-ForStaSH_0.12.2/dulwich&move_to=site-packages'
+
 
 def _progress(tot):
     print 'Downloaded {0} bytes'.format(tot)
