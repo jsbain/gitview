@@ -299,12 +299,20 @@ class repoView (object):
     def did_select_repo(self,sender):
 
         self.g=self._get_repo()
+        try:
+           self.g.head
+        except KeyError:
+           def fixHEAD(sender):
+               self._repo().refs.set_symbolic_ref('HEAD', 'refs/heads/'+branch)   	
+           self.confirm(fixHEAD,'No HEAD found. set to master?')
         if self.g:
             r.view['branch'].text=self.g.active_branch
             author,author_email=self._get_last_committer()
             self.view['user'].text=author
             self.view['email'].text=author_email
             remote, remote_branch=self.remote_for_head()
+            if not remote:
+            	remote=self.remotes_iterator().next()
             self.view['remote'].text=remote
             self.view['remotebranch'].text=remote_branch
         else:
